@@ -14,6 +14,14 @@
 #include <cstring>
 #include <cfloat>
 
+#ifndef EVAL_DEFAULT_AUDIO_INPUT
+#define EVAL_DEFAULT_AUDIO_INPUT "audio/Voice_MicIn0_Mark_Noisy.wav"
+#endif
+
+#ifndef EVAL_DEFAULT_WHISPER_MODEL
+#define EVAL_DEFAULT_WHISPER_MODEL "models/ggml-base.en.bin"
+#endif
+
 #if defined(_WIN32)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -84,7 +92,7 @@ struct whisper_params {
     std::string language  = "en";
     std::string prompt;
     std::string font_path = "/System/Library/Fonts/Supplemental/Courier New Bold.ttf";
-    std::string model     = "models/ggml-base.en.bin";
+    std::string model     = EVAL_DEFAULT_WHISPER_MODEL;
     std::string grammar;
     std::string grammar_rule;
 
@@ -969,6 +977,11 @@ int main(int argc, char ** argv) {
     if (whisper_params_parse(argc, argv, params) == false) {
         whisper_print_usage(argc, argv, params);
         return 1;
+    }
+
+    if (params.fname_inp.empty()) {
+        params.fname_inp.push_back(EVAL_DEFAULT_AUDIO_INPUT);
+        fprintf(stderr, "info: no input file provided, using default: %s\n", EVAL_DEFAULT_AUDIO_INPUT);
     }
 
     // remove non-existent files
